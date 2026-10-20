@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web to APK Creator Dashboard</title>
+    <!-- Tailwind CSS CDN for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between">
+
+    <!-- Header -->
+    <header class="bg-slate-800 border-b border-slate-700 py-4 px-6 shadow-md">
+        <div class="max-w-4xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                🚀 APK Creator Studio
+            </h1>
+            <span class="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-3 py-1 rounded-full font-medium">
+                GitHub Pages Live
+            </span>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-2xl mx-auto w-full p-6 my-8 bg-slate-800/50 border border-slate-700 rounded-2xl shadow-xl backdrop-blur-md">
+        <h2 class="text-lg font-semibold mb-4 text-slate-200 border-b border-slate-700 pb-2">
+            Build Your Android Application
+        </h2>
+
+        <form id="apkForm" class="space-y-4">
+            <!-- App Name -->
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Application Name</label>
+                <input type="text" id="appName" required placeholder="e.g. MovieApp Pro" 
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-emerald-500 transition">
+            </div>
+
+            <!-- Package Name -->
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Package Name (App ID)</label>
+                <input type="text" id="packageName" required placeholder="com.example.movieapp" 
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-emerald-500 transition">
+            </div>
+
+            <!-- Target Website URL -->
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">Target Website URL</label>
+                <input type="url" id="appUrl" required placeholder="https://yourwebsite.com" 
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-emerald-500 transition">
+            </div>
+
+            <!-- App Icon Link -->
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-1">App Icon Image URL</label>
+                <input type="url" id="appIcon" placeholder="https://i.imgur.com/icon.png" 
+                    class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-slate-100 focus:outline-none focus:border-emerald-500 transition">
+            </div>
+
+            <!-- Action Button -->
+            <button type="submit" 
+                class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 mt-6">
+                Generate APK Configuration
+            </button>
+        </form>
+
+        <!-- Result Box -->
+        <div id="resultBox" class="hidden mt-6 p-4 bg-slate-900 border border-emerald-500/30 rounded-xl">
+            <h3 class="text-sm font-semibold text-emerald-400 mb-2">Configuration Ready:</h3>
+            <pre id="outputJson" class="text-xs text-slate-300 overflow-x-auto p-2 bg-slate-950 rounded border border-slate-800"></pre>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="text-center py-4 text-xs text-slate-500 border-t border-slate-800">
+        Powered by GitHub Pages & Web-to-APK Engine
+    </footer>
+
+    <!-- JavaScript Handler -->
+    <script>
+        document.getElementById('apkForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const appName = document.getElementById('appName').value;
+            const packageName = document.getElementById('packageName').value;
+            const appUrl = document.getElementById('appUrl.value' || 'appUrl').value;
+            const appIcon = document.getElementById('appIcon').value;
+
+            const configData = {
+                name: appName,
+                package: packageName,
+                url: appUrl,
+                icon: appIcon || "default_icon.png",
+                generated_at: new Date().toISOString()
+            };
+
+            const resultBox = document.getElementById('resultBox');
+            const outputJson = document.getElementById('outputJson');
+
+            outputJson.textContent = JSON.stringify(configData, null, 2);
+            resultBox.classList.remove('hidden');
+        });
+    </script>
+</body>
+</html>
