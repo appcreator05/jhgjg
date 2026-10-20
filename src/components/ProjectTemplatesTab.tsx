@@ -34,7 +34,7 @@ export const ProjectTemplatesTab: React.FC<ProjectTemplatesTabProps> = ({ config
     }
 }
 dependencyResolutionManagement {
-    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositoriesMode.set(RepositoriesMode.PREFER_SETTINGS)
     repositories {
         google()
         mavenCentral()
@@ -55,13 +55,6 @@ include ':app'`,
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:8.3.2'
-    }
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
     }
 }
 
