@@ -1,0 +1,6 @@
+{
+  "name": "APK Creator Studio",
+  "description": "Web to APK Creator Dashboard to configure and build Android applications with real-time GitHub Actions workflow tracking and device preview.",
+  "permissions": [],
+  "capabilities": []
+}

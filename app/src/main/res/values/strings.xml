@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">My App</string>
+    <string name="target_url">https://example.com</string>
+    <string name="network_error_title">No Internet Connection</string>
+    <string name="network_error_msg">Please check your connection and tap retry.</string>
+    <string name="retry_btn">Retry</string>
+</resources>
