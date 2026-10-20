@@ -62,6 +62,14 @@ task clean(type: Delete) {
     delete rootProject.buildDir
 }`,
     },
+    gradleProperties: {
+      path: 'gradle.properties',
+      language: 'properties',
+      desc: 'Project configuration flags enabling AndroidX support and JVM compiler optimization.',
+      content: `android.useAndroidX=true
+android.enableJetifier=true
+org.gradle.jvmargs=-Xmx2048m -Dfile.encoding=UTF-8`,
+    },
     appBuild: {
       path: 'app/build.gradle',
       language: 'groovy',
