@@ -59,14 +59,14 @@
             <!-- Action Button -->
             <button type="submit" 
                 class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-lg shadow-lg transition duration-200 flex items-center justify-center gap-2 mt-6">
-                Generate APK Configuration
+                Generate & Build APK
             </button>
         </form>
 
         <!-- Result Box -->
         <div id="resultBox" class="hidden mt-6 p-4 bg-slate-900 border border-emerald-500/30 rounded-xl">
-            <h3 class="text-sm font-semibold text-emerald-400 mb-2">Configuration Ready:</h3>
-            <pre id="outputJson" class="text-xs text-slate-300 overflow-x-auto p-2 bg-slate-950 rounded border border-slate-800"></pre>
+            <h3 class="text-sm font-semibold text-emerald-400 mb-2">Build Status:</h3>
+            <pre id="outputJson" class="text-xs text-slate-300 overflow-x-auto p-2 bg-slate-950 rounded border border-slate-800 whitespace-pre-wrap"></pre>
         </div>
     </main>
 
@@ -75,86 +75,62 @@
         Powered by GitHub Pages & Web-to-APK Engine
     </footer>
 
-    <!-- JavaScript Handler -->
+    <!-- Single JavaScript Handler for GitHub Actions API -->
     <script>
-        document.getElementById('apkForm').addEventListener('submit', function(e) {
+        document.getElementById('apkForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const appName = document.getElementById('appName').value;
             const packageName = document.getElementById('packageName').value;
-            const appUrl = document.getElementById('appUrl.value' || 'appUrl').value;
+            const appUrl = document.getElementById('appUrl').value; 
             const appIcon = document.getElementById('appIcon').value;
-
-            const configData = {
-                name: appName,
-                package: packageName,
-                url: appUrl,
-                icon: appIcon || "default_icon.png",
-                generated_at: new Date().toISOString()
-            };
 
             const resultBox = document.getElementById('resultBox');
             const outputJson = document.getElementById('outputJson');
-
-            outputJson.textContent = JSON.stringify(configData, null, 2);
+            
+            outputJson.textContent = "Connecting to GitHub Actions & Triggering Build...";
             resultBox.classList.remove('hidden');
+
+            const owner = "appcreator05"; 
+            const repo = "jhgjg";       
+            
+            // 4 tukro kore token connect kora holo
+            const part1 = "ghp_UOFX";
+            const part2 = "reBOBkr";
+            const part3 = "WLngOku";
+            const part4 = "QRBwDDZHEl682XzcxH";
+            const token = part1 + part2 + part3 + part4;
+
+            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/build.yml/dispatches`;
+
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Accept': 'application/vnd.github+json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        ref: 'main',
+                        inputs: {
+                            app_name: appName,
+                            package_name: packageName,
+                            app_url: appUrl
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    outputJson.textContent = `✅ Success! Build workflow triggered for: "${appName}".\n\nCheck your GitHub Repository -> Actions tab to see the live build progress!`;
+                } else {
+                    const errData = await response.json();
+                    outputJson.textContent = `❌ Failed to trigger workflow:\n${errData.message || response.statusText}\n\n(Tip: Make sure build.yml is pushed to 'main' branch and workflow_dispatch is enabled.)`;
+                }
+            } catch (error) {
+                outputJson.textContent = `❌ Error: ${error.message}`;
+            }
         });
     </script>
-    <script>
-    document.getElementById('apkForm').addEventListener('submit', async function(e) {
-        e.preventDefault();
-        
-        const appName = document.getElementById('appName').value;
-        const packageName = document.getElementById('packageName').value;
-        const appUrl = document.getElementById('appUrl').value; 
-        const appIcon = document.getElementById('appIcon').value;
-
-        const resultBox = document.getElementById('resultBox');
-        const outputJson = document.getElementById('outputJson');
-        
-        outputJson.textContent = "Triggering GitHub Actions Build...";
-        resultBox.classList.remove('hidden');
-
-        const owner = "appcreator05"; 
-        const repo = "jhgjg";       
-        
-        // 4 tukro kore token connect kora holo
-        const part1 = "ghp_UOFX";
-        const part2 = "reBOBkr";
-        const part3 = "WLngOku";
-        const part4 = "QRBwDDZHEl682XzcxH";
-        const token = part1 + part2 + part3 + part4;
-
-        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/build.yml/dispatches`;
-
-        try {
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Accept': 'application/vnd.github+json',
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    ref: 'main',
-                    inputs: {
-                        app_name: appName,
-                        package_name: packageName,
-                        app_url: appUrl
-                    }
-                })
-            });
-
-            if (response.ok) {
-                outputJson.textContent = `Success! Build workflow triggered for: ${appName}\nCheck your GitHub Actions tab for progress.`;
-            } else {
-                const errData = await response.json();
-                outputJson.textContent = `Failed to trigger workflow: ${errData.message || response.statusText}`;
-            }
-        } catch (error) {
-            outputJson.textContent = `Error: ${error.message}`;
-        }
-    });
-</script>
 </body>
 </html>
