@@ -77,60 +77,99 @@
 
     <!-- Single JavaScript Handler for GitHub Actions API -->
     <script>
-        document.getElementById('apkForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const appName = document.getElementById('appName').value;
-            const packageName = document.getElementById('packageName').value;
-            const appUrl = document.getElementById('appUrl').value; 
-            const appIcon = document.getElementById('appIcon').value;
+    document.getElementById('apkForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const appName = document.getElementById('appName').value;
+        const packageName = document.getElementById('packageName').value;
+        const appUrl = document.getElementById('appUrl').value; 
+        const appIcon = document.getElementById('appIcon').value;
 
-            const resultBox = document.getElementById('resultBox');
-            const outputJson = document.getElementById('outputJson');
-            
-            outputJson.textContent = "Connecting to GitHub Actions & Triggering Build...";
-            resultBox.classList.remove('hidden');
+        const resultBox = document.getElementById('resultBox');
+        const outputJson = document.getElementById('outputJson');
+        
+        outputJson.innerHTML = "🚀 Workflow triggered successfully!<br>⏳ Building APK in the background (Please wait 1-2 minutes)...";
+        resultBox.classList.remove('hidden');
 
-            const owner = "appcreator05"; 
-            const repo = "jhgjg";       
-            
-            // 4 tukro kore token connect kora holo
-            const part1 = "ghp_UOFX";
-            const part2 = "reBOBkr";
-            const part3 = "WLngOku";
-            const part4 = "QRBwDDZHEl682XzcxH";
-            const token = part1 + part2 + part3 + part4;
+        const owner = "appcreator05"; 
+        const repo = "jhgjg";       
+        
+        // Token pieces
+        const part1 = "ghp_UOFX";
+        const part2 = "reBOBkr";
+        const part3 = "WLngOku";
+        const part4 = "QRBwDDZHEl682XzcxH";
+        const token = part1 + part2 + part3 + part4;
 
-            const apiUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/build.yml/dispatches`;
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/build.yml/dispatches`;
 
-            try {
-                const response = await fetch(apiUrl, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Accept': 'application/vnd.github+json',
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        ref: 'main',
-                        inputs: {
-                            app_name: appName,
-                            package_name: packageName,
-                            app_url: appUrl
-                        }
-                    })
-                });
+        try {
+            // 1. Trigger the workflow
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ref: 'main',
+                    inputs: {
+                        app_name: appName,
+                        package_name: packageName,
+                        app_url: appUrl
+                    }
+                })
+            });
 
-                if (response.ok) {
-                    outputJson.textContent = `✅ Success! Build workflow triggered for: "${appName}".\n\nCheck your GitHub Repository -> Actions tab to see the live build progress!`;
-                } else {
-                    const errData = await response.json();
-                    outputJson.textContent = `❌ Failed to trigger workflow:\n${errData.message || response.statusText}\n\n(Tip: Make sure build.yml is pushed to 'main' branch and workflow_dispatch is enabled.)`;
-                }
-            } catch (error) {
-                outputJson.textContent = `❌ Error: ${error.message}`;
+            if (!response.ok) {
+                const errData = await response.json();
+                outputJson.textContent = `❌ Failed to trigger workflow: ${errData.message || response.statusText}`;
+                return;
             }
-        });
-    </script>
+
+            // 2. Poll for the latest build status
+            outputJson.innerHTML = `🔄 Build started for "<b>${appName}</b>". Checking status...`;
+            
+            let checkInterval = setInterval(async () => {
+                const runsRes = await fetch(`https://api.github.com/repos/${owner}/${repo}/actions/workflows/build.yml/runs?per_page=1`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                const runsData = await runsRes.json();
+
+                if (runsData.workflow_runs && runsData.workflow_runs.length > 0) {
+                    const latestRun = runsData.workflow_runs[0];
+                    const status = latestRun.status;     // queued, in_progress, completed
+                    const conclusion = latestRun.conclusion; // success, failure, null
+
+                    if (status === 'completed') {
+                        clearInterval(checkInterval);
+                        if (conclusion === 'success') {
+                            outputJson.innerHTML = `✅ <b>Build Successful!</b><br>Your APK is ready. Click below to download from GitHub Actions.`;
+                            
+                            // Add Download Link Button
+                            if (!document.getElementById('downloadBtn')) {
+                                const btn = document.createElement('a');
+                                btn.id = 'downloadBtn';
+                                btn.href = latestRun.html_url;
+                                btn.target = '_blank';
+                                btn.className = 'mt-4 inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-6 py-2.5 rounded-lg shadow transition';
+                                btn.textContent = '📥 Download APK / View Artifacts';
+                                resultBox.appendChild(btn);
+                            }
+                        } else {
+                            outputJson.innerHTML = `❌ Build failed or cancelled. Check GitHub Actions tab for errors.`;
+                        }
+                    } else {
+                        outputJson.innerHTML = `⏳ Status: <b>${status}</b>... Please wait, building APK via Gradle.`;
+                    }
+                }
+            }, 10000); // প্রতি ১০ সেকেন্ড পর পর চেক করবে
+
+        } catch (error) {
+            outputJson.textContent = `❌ Error: ${error.message}`;
+        }
+    });
+</script>
 </body>
 </html>
