@@ -32,6 +32,8 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-36 build-tools;34.0.0 platform-tools cmdline-tools;latest'
 
       - name: Cache Gradle Packages
         uses: actions/cache@v4
@@ -43,14 +45,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - name: Generate App Configuration
+      - name: Generate App Configuration & Update SDK
         run: |
           echo "Building APK for:"
           echo "Name: ${{ github.event.inputs.app_name }}"
           echo "Package: ${{ github.event.inputs.package_name }}"
           echo "URL: ${{ github.event.inputs.app_url }}"
           
-          # এখানে আপনি আপনার মূল অ্যান্ড্রয়েড প্রোজেক্টের কনফিগ ফাইল (যেমন strings.xml বা build.gradle) ডাইনামিক্যালি আপডেট করার স্ক্রিপ্ট বা কমান্ড দিতে পারেন।
+          # যদি আপনার প্রজেক্টের build.gradle ফাইলে ডাইনামিক্যালি minSdk 21 এবং targetSdk 36 সেট করতে চান:
+          if [ -f "app/build.gradle" ]; then
+            sed -i 's/minSdk.*/minSdk 21/g' app/build.gradle
+            sed -i 's/targetSdk.*/targetSdk 36/g' app/build.gradle
+            sed -i 's/compileSdk.*/compileSdk 36/g' app/build.gradle
+            echo "Successfully updated build.gradle with minSdk 21 & targetSdk 36"
+          fi
 
       - name: Build APK with Gradle
         run: |
