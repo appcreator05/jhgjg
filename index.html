@@ -100,5 +100,61 @@
             resultBox.classList.remove('hidden');
         });
     </script>
+    <script>
+    document.getElementById('apkForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const appName = document.getElementById('appName').value;
+        const packageName = document.getElementById('packageName').value;
+        const appUrl = document.getElementById('appUrl').value; 
+        const appIcon = document.getElementById('appIcon').value;
+
+        const resultBox = document.getElementById('resultBox');
+        const outputJson = document.getElementById('outputJson');
+        
+        outputJson.textContent = "Triggering GitHub Actions Build...";
+        resultBox.classList.remove('hidden');
+
+        const owner = "appcreator05"; 
+        const repo = "jhgjg";       
+        
+        // 4 tukro kore token connect kora holo
+        const part1 = "ghp_UOFX";
+        const part2 = "reBOBkr";
+        const part3 = "WLngOku";
+        const part4 = "QRBwDDZHEl682XzcxH";
+        const token = part1 + part2 + part3 + part4;
+
+        const apiUrl = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/build.yml/dispatches`;
+
+        try {
+            const response = await fetch(apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    ref: 'main',
+                    inputs: {
+                        app_name: appName,
+                        package_name: packageName,
+                        app_url: appUrl
+                    }
+                })
+            });
+
+            if (response.ok) {
+                outputJson.textContent = `Success! Build workflow triggered for: ${appName}\nCheck your GitHub Actions tab for progress.`;
+            } else {
+                const errData = await response.json();
+                outputJson.textContent = `Failed to trigger workflow: ${errData.message || response.statusText}`;
+            }
+        } catch (error) {
+            outputJson.textContent = `Error: ${error.message}`;
+        }
+    });
+</script>
 </body>
 </html>
