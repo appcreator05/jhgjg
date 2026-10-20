@@ -52,7 +52,7 @@ jobs:
           echo "Package: ${{ github.event.inputs.package_name }}"
           echo "URL: ${{ github.event.inputs.app_url }}"
           
-          # যদি আপনার প্রজেক্টের build.gradle ফাইলে ডাইনামিক্যালি minSdk 21 এবং targetSdk 36 সেট করতে চান:
+          # build.gradle ফাইলে ডাইনামিক্যালি minSdk 21 এবং targetSdk/compileSdk 36 সেট করা
           if [ -f "app/build.gradle" ]; then
             sed -i 's/minSdk.*/minSdk 21/g' app/build.gradle
             sed -i 's/targetSdk.*/targetSdk 36/g' app/build.gradle
@@ -62,6 +62,11 @@ jobs:
 
       - name: Build APK with Gradle
         run: |
+          # যদি gradlew ফাইল না থাকে, তবে র‍্যাপার জেনারেট করে নেওয়া
+          if [ ! -f "gradlew" ]; then
+            echo "gradlew not found, generating gradle wrapper..."
+            gradle wrapper
+          fi
           chmod +x gradlew
           ./gradlew assembleRelease --stacktrace
 
